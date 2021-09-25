@@ -8,6 +8,8 @@
 #include "admin_change_user.hpp"
 
 #include <QJsonDocument>
+#include <QVBoxLayout>
+#include <QPushButton>
 
 #include <fstream>
 
@@ -22,29 +24,33 @@ const std::string kAdminName{"ADMIN"};
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
+   all_users_[kAdminName] = users::User(kAdminName, false, false);
 
-    qDebug() << system("pwd");
-    std::fstream file("../../../../../../test.json", std::ios_base::in | std::ios_base::out);
-    if (file.is_open()) {
-        qDebug() << "here";
-    }
-//    auto file_data = file.readAll();
 
+    QPushButton* button = new QPushButton("tmp");
+
+    QVBoxLayout* layout = new QVBoxLayout(this);
+
+    current_form_ = new forms::Promt(this);
     auto menu_bar = utils::CreateMenuBar(this);
+
+
+    setCentralWidget(current_form_);
+
 }
 
 void MainWindow::ChangeState(States new_state) {
     delete current_form_;
 
     switch (new_state) {
-        case States::kPromt: current_form_ = new forms::Promt(); break;
+        case States::kPromt: current_form_ = new forms::Promt(this); break;
         case States::kUpdateUser: current_form_ = new forms::UpdateUser(); break;
-        case States::kAdmin: current_form_ = new forms::Admin(); break;
-        case States::kAdminChangeUser: current_form_ = new forms::AdminChangeUser();
+        case States::kAdmin: current_form_ = new forms::Admin(this); break;
+        case States::kAdminChangeUser: current_form_ = new forms::AdminChangeUser(); break;
     }
 
     current_state_ = new_state;
-    current_form_->show();
+    setCentralWidget(current_form_);
 }
 
 bool MainWindow::SetCurrentUser(const std::string &name,
