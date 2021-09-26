@@ -1,13 +1,15 @@
 #pragma once
 
 #include <string>
+#include <QJsonValue>
 
 namespace users {
 
 class User
 {
 public:
-    User(const std::string& name, bool is_blocked, bool password_limit);
+    User(const QJsonValue& value);
+    User(const std::string& name);
     User() = default;
     User(const User& user) = default;
 
@@ -23,6 +25,8 @@ public:
 
     std::string GetName() const;
     std::string GetPassword() const;
+    bool GetIsBlocked() const;
+    bool GetIsLimited() const;
 
 private:
     std::string name_;

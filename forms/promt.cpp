@@ -54,9 +54,24 @@ void Promt::CheckPassword() {
 }
 
 void Promt::SendUser(int& retry_count) {
+    [[maube_unused]]users::User tmp;
     if (!main_form_->SetCurrentUser(
                 this->username_.text().toStdString(),
                 this->password_.text().toStdString())) {
+        if (!this->username_.text().size()
+                   || !this->main_form_->GetUserByName(this->username_.text().toStdString(), tmp)) {
+            QMessageBox message(QMessageBox::Icon::Critical, "Ошибка ввода пароля",
+                                "Неправильное имя пользователя");
+            message.setFocus();
+            message.exec();
+        } else {
+            std::string text("Неправильный пароль!\n Осталось попыток: ");
+            QMessageBox message(QMessageBox::Icon::Critical, "Ошибка ввода пароля",
+                                (text  + std::to_string(2 - retry_count)).c_str());
+            message.setFocus();
+            message.exec();
+        }
+
         if (++retry_count == 3) {
             QMessageBox message(QMessageBox::Icon::Critical, "Ошибка ввода пароля",
                                 "Будет выполнен выход из программы!");
@@ -64,6 +79,12 @@ void Promt::SendUser(int& retry_count) {
             message.exec();
             exit(0);
         }
+    } else if (this->main_form_->CurrentUserIsBlocked()) {
+        QMessageBox message(QMessageBox::Icon::Critical, "Ошибка",
+                            "Вы заблокированы!\n Обратитесь к администратору");
+        message.setFocus();
+        message.exec();
+        exit(0);
     } else {
         retry_count = 0;
         if (password_.text().isEmpty() || this->username_.text().toStdString() != kAdminName) {

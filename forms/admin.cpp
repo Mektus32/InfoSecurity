@@ -18,6 +18,17 @@ Admin::Admin(QWidget* main_widget)
     layout->addWidget(admin_work);
     layout->addWidget(cancel);
 
+    connect(change_password, &QPushButton::clicked, [this](){
+        this->main_form_->ChangeState(States::kUpdateUser);
+    });
+
+    connect(admin_work, &QPushButton::clicked, [this](){
+        this->main_form_->ChangeState(States::kAdminChangeUser);
+    });
+
+    connect(cancel, &QPushButton::clicked, [this](){
+        this->main_form_->ChangeState(States::kPromt);
+    });
 }
 
 } // namespace forms

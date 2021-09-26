@@ -10,6 +10,10 @@
 #include <QJsonDocument>
 #include <QVBoxLayout>
 #include <QPushButton>
+#include <QFile>
+#include <QMessageBox>
+#include <QJsonObject>
+#include <QJsonArray>
 
 #include <fstream>
 
@@ -18,25 +22,27 @@ namespace forms {
 namespace {
 
 const std::string kAdminName{"ADMIN"};
+const std::string kFilePath{"../../../data.json"};
 
 } // namespace
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
-   all_users_[kAdminName] = users::User(kAdminName, false, false);
+    GetDataFromFile();
 
-
-    QPushButton* button = new QPushButton("tmp");
-
-    QVBoxLayout* layout = new QVBoxLayout(this);
+    all_users_[""] = users::User(std::string(""));
 
     current_form_ = new forms::Promt(this);
-    auto menu_bar = utils::CreateMenuBar(this);
 
+    utils::CreateMenuBar(this);
 
     setCentralWidget(current_form_);
 
+}
+
+MainWindow::~MainWindow() {
+    SetDataInFile();
 }
 
 void MainWindow::ChangeState(States new_state) {
@@ -44,9 +50,9 @@ void MainWindow::ChangeState(States new_state) {
 
     switch (new_state) {
         case States::kPromt: current_form_ = new forms::Promt(this); break;
-        case States::kUpdateUser: current_form_ = new forms::UpdateUser(); break;
+        case States::kUpdateUser: current_form_ = new forms::UpdateUser(this); break;
         case States::kAdmin: current_form_ = new forms::Admin(this); break;
-        case States::kAdminChangeUser: current_form_ = new forms::AdminChangeUser(); break;
+        case States::kAdminChangeUser: current_form_ = new forms::AdminChangeUser(this); break;
     }
 
     current_state_ = new_state;
@@ -55,7 +61,7 @@ void MainWindow::ChangeState(States new_state) {
 
 bool MainWindow::SetCurrentUser(const std::string &name,
                                 const std::string &password) {
-    if ((current_user_ = all_users_.find(name)) != all_users_.end()) {
+    if ((current_user_ = all_users_.find(name)) != all_users_.end() && name.size()) {
 
         if (current_user_->second.GetPassword() == password) {
             if (name == kAdminName) {
@@ -82,18 +88,23 @@ bool MainWindow::UpdateUserPassword(const std::string &new_password) {
 
 }
 
-users::User MainWindow::GetNextUser() {
+users::User MainWindow::GetNextUser(const std::string& name) {
 
-    if ((++current_user_)->second != admin_
-            || current_user_ == all_users_.end()) {
-        --current_user_;
+    auto user = all_users_.find(name);
+    if ((++user)->second != admin_
+            || user == all_users_.end()) {
+        --user;
     }
 
-    if (++current_user_ == all_users_.end()) {
-        current_user_ = all_users_.begin();
+    if (++user == all_users_.end()) {
+        user = all_users_.begin();
     }
 
-    return current_user_->second;
+    if (all_users_.size() > 1 && !user->first.size()) {
+         user->second = GetNextUser(user->first);
+    }
+
+    return user->second;
 
 }
 
@@ -109,5 +120,77 @@ bool MainWindow::UpdateUserValue(users::User &&user) {
 }
 
 
+bool MainWindow::CurrentUserIsAdmin() const {
+    return current_user_->first == kAdminName;
+}
+
+bool MainWindow::CurrentUserHasPassword() const {
+    return static_cast<bool>(current_user_->second.GetPassword().size());
+}
+
+bool MainWindow::CurrentUserIsBlocked() const {
+    return current_user_->second.GetIsBlocked();
+}
+
+bool MainWindow::GetUserByName(const std::string &name, users::User& user) const {
+    if (!all_users_.count(name) || !name.size()) {
+        return false;
+    }
+
+    auto tmp = all_users_.at(name);
+    user = tmp;
+
+    return true;
+}
+
+void MainWindow::GetDataFromFile() {
+    QFile file(kFilePath.c_str());
+
+    if (!file.open(QIODevice::ReadOnly)) {
+        QMessageBox message(QMessageBox::Icon::Critical, "Ошибка данных",
+                            "Внутренняя ошибка, прложение будет закрыто");
+        message.setFocus();
+        message.exec();
+        exit(0);
+    }
+
+    auto byte_array = file.readAll();
+    auto json_doc = QJsonDocument::fromJson(byte_array);
+
+    for (const auto& elem : json_doc.object()["users"].toArray()) {
+        users::User user(elem);
+        all_users_[user.GetName()] = std::move(user);
+    }
+    file.close();
+}
+
+void MainWindow::SetDataInFile() {
+    QFile file(kFilePath.c_str());
+
+    if (!file.open(QIODevice::WriteOnly)) {
+        QMessageBox message(QMessageBox::Icon::Critical, "Ошибка данных",
+                            "Внутренняя ошибка, прложение будет закрыто");
+        message.setFocus();
+        message.exec();
+        exit(0);
+    }
+
+    QJsonDocument json_doc;
+    QJsonArray json_array;
+    for (const auto& [name, user] : all_users_) {
+        if (name != "") {
+            QJsonObject object;
+            object["name"] = user.GetName().c_str();
+            object["password"] = user.GetPassword().c_str();
+            object["is_blocked"] = user.GetIsBlocked();
+            object["is_limited"] = user.GetIsLimited();
+            json_array.append(object);
+        }
+    }
+    json_doc.setArray(json_array);
+    file.write(json_doc.toJson());
+
+    file.close();
+}
 
 } // namespace forms

@@ -4,8 +4,17 @@
 
 namespace users {
 
-User::User(const std::string& name, bool is_blocked, bool password_limit)
-    : name_(name), is_blocked_(is_blocked), password_limit_(password_limit)
+User::User(const QJsonValue& value)
+    : name_(value["name"].toString().toStdString()),
+      password_(value["password"].toString().toStdString()),
+      is_blocked_(value["is_blocked"].toBool()),
+      password_limit_(value["is_limited"].toBool()) {
+
+}
+
+
+User::User(const std::string& name)
+    : name_(name), is_blocked_(false), password_limit_(false)
 {
 
 }
@@ -58,6 +67,14 @@ std::string User::GetName() const {
 
 std::string User::GetPassword() const {
     return password_;
+}
+
+bool User::GetIsBlocked() const {
+    return is_blocked_;
+}
+
+bool User::GetIsLimited() const {
+    return password_limit_;
 }
 
 } // namespace users

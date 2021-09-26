@@ -16,7 +16,7 @@ class MainWindow : public QMainWindow
 
 public:
     MainWindow(QWidget *parent = nullptr);
-    ~MainWindow() = default;
+    ~MainWindow();
 
     void ChangeState(States new_state);
 
@@ -25,10 +25,22 @@ public:
 
     bool UpdateUserPassword(const std::string& new_password);
 
-    users::User GetNextUser();
+    users::User GetNextUser(const std::string& name);
 
     bool UpdateUserValue(users::User&& user);
 
+    bool CurrentUserIsAdmin() const;
+
+    bool CurrentUserHasPassword() const;
+
+    bool CurrentUserIsBlocked() const;
+
+    bool GetUserByName(const std::string &name, users::User& user) const;
+
+    void SetDataInFile();
+
+private:
+    void GetDataFromFile();
 
 private:
     std::map<std::string, users::User> all_users_;
