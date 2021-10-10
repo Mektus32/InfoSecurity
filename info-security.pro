@@ -11,6 +11,7 @@ CONFIG += c++17
 SOURCES += \
     forms/admin.cpp \
     forms/admin_change_user.cpp \
+    forms/file_encrypt_decrypt.cpp \
     forms/main_window.cpp \
     forms/promt.cpp \
     forms/update_user.cpp \
@@ -22,6 +23,7 @@ SOURCES += \
 HEADERS += \
     forms/admin.hpp \
     forms/admin_change_user.hpp \
+    forms/file_encrypt_decrypt.h \
     forms/main_window.hpp \
     forms/promt.hpp \
     forms/update_user.hpp \

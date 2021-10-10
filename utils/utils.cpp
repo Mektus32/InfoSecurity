@@ -21,4 +21,12 @@ QMenuBar* CreateMenuBar(QWidget *parent) {
     return menu_bar;
 }
 
+void Encrypt() {
+    system("/Library/Frameworks/Python.framework/Versions/3.7/bin/python3 main.py - encrypt");
+}
+
+bool Decrypt(const std::string& password) {
+    return !system((std::string("/Library/Frameworks/Python.framework/Versions/3.7/bin/python3 main.py ") + password + " decrypt").c_str());
+}
+
 } // namespace utils

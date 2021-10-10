@@ -7,6 +7,7 @@
 #include "admin.hpp"
 #include "admin_change_user.hpp"
 #include "user_promt.h"
+#include "file_encrypt_decrypt.h"
 
 #include <QJsonDocument>
 #include <QVBoxLayout>
@@ -34,7 +35,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     all_users_[""] = users::User(std::string(""));
 
-    current_form_ = new forms::Promt(this);
+    current_form_ = new FileEncryptDecrypt(this);
 
     utils::CreateMenuBar(this);
 
@@ -44,6 +45,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow() {
     SetDataInFile();
+    utils::Encrypt();
 }
 
 void MainWindow::ChangeState(States new_state) {
@@ -107,7 +109,6 @@ users::User MainWindow::GetNextUser(const std::string& name) {
     }
 
     if (all_users_.size() > 2 && !user->first.size()) {
-        qDebug() << user->first.c_str();
         user->second = GetNextUser(user->first);
     }
 
