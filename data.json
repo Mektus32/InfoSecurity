@@ -1,0 +1,25 @@
+{
+    "users": [
+        {
+            "is_blocked": false,
+            "is_limited": false,
+            "name": "ADMIN",
+            "need_change_password": false,
+            "password": "123"
+        },
+        {
+            "is_blocked": false,
+            "is_limited": true,
+            "name": "Kek",
+            "need_change_password": false,
+            "password": "kek,wqe"
+        },
+        {
+            "is_blocked": false,
+            "is_limited": false,
+            "name": "USER",
+            "need_change_password": false,
+            "password": ""
+        }
+    ]
+}

@@ -69,7 +69,7 @@ AdminChangeUser::AdminChangeUser(QWidget* main_widget)
         }
         users::User user(this->username_.text().toStdString());
 
-        if (this->is_blocked_.isChecked() && !this->main_form_->GetUserByName(this->username_.text().toStdString(), user)) {
+        if (!this->main_form_->GetUserByName(this->username_.text().toStdString(), user) && this->is_blocked_.isChecked()) {
             QMessageBox message(QMessageBox::Icon::Critical, "Ошибка",
                                 "Нельзя создать заблокированного пользователя");
             message.setFocus();
@@ -78,6 +78,9 @@ AdminChangeUser::AdminChangeUser(QWidget* main_widget)
         }
         user.SetIsBlocked(this->is_blocked_.isChecked());
         user.SetPasswordLimit(this->is_limited_.isChecked());
+        if (!user.ChangePassword(user.GetPassword())) {
+            user.SetNeedChangePassword(true);
+        }
         this->main_form_->UpdateUserValue(std::move(user));
 
     });

@@ -59,7 +59,7 @@ UpdateUser::UpdateUser(QWidget* main_widget)
                if (this->main_form_->CurrentUserIsAdmin()) {
                    this->main_form_->ChangeState(States::kAdmin);
                } else {
-                   this->main_form_->ChangeState(States::kPromt);
+                   this->main_form_->ChangeState(States::kUserPromt);
                }
            }
         }
@@ -75,7 +75,7 @@ UpdateUser::UpdateUser(QWidget* main_widget)
             if (this->main_form_->CurrentUserIsAdmin()) {
                 this->main_form_->ChangeState(States::kAdmin);
             } else {
-                this->main_form_->ChangeState(States::kPromt);
+                this->main_form_->ChangeState(States::kUserPromt);
             }
         }
     });

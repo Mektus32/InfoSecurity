@@ -22,17 +22,20 @@ public:
     bool ChangePassword(const std::string& password);
     void SetIsBlocked(bool is_blocked);
     void SetPasswordLimit(bool password_limit);
+    void SetNeedChangePassword(bool need_change_password);
 
     std::string GetName() const;
     std::string GetPassword() const;
     bool GetIsBlocked() const;
     bool GetIsLimited() const;
+    bool GetNeedChagePassword() const;
 
 private:
     std::string name_;
     std::string password_;
     bool is_blocked_;
     bool password_limit_;
+    bool need_change_password_;
 };
 
 } // namespace users

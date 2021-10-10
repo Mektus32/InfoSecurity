@@ -81,14 +81,15 @@ void Promt::SendUser(int& retry_count) {
         }
     } else if (this->main_form_->CurrentUserIsBlocked()) {
         QMessageBox message(QMessageBox::Icon::Critical, "Ошибка",
-                            "Вы заблокированы!\n Обратитесь к администратору");
+                            "Вы заблокированы!\nОбратитесь к администратору");
         message.setFocus();
         message.exec();
-        exit(0);
     } else {
         retry_count = 0;
-        if (password_.text().isEmpty() || this->username_.text().toStdString() != kAdminName) {
+        if (password_.text().isEmpty() || (this->username_.text().toStdString() != kAdminName && !main_form_->CurrentUserHasPassword())) {
             main_form_->ChangeState(States::kUpdateUser);
+        } else if (this->username_.text().toStdString() != kAdminName) {
+            main_form_->ChangeState(States::kUserPromt);
         } else {
             main_form_->ChangeState(States::kAdmin);
         }

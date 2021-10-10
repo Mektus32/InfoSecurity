@@ -8,14 +8,14 @@ User::User(const QJsonValue& value)
     : name_(value["name"].toString().toStdString()),
       password_(value["password"].toString().toStdString()),
       is_blocked_(value["is_blocked"].toBool()),
-      password_limit_(value["is_limited"].toBool()) {
+      password_limit_(value["is_limited"].toBool()),
+      need_change_password_(value["need_change_password"].toBool())  {
 
 }
 
 
 User::User(const std::string& name)
-    : name_(name), is_blocked_(false), password_limit_(false)
-{
+    : name_(name), is_blocked_(false), password_limit_(false), need_change_password_(false) {
 
 }
 
@@ -24,12 +24,14 @@ User& User::operator=(User &&user) {
     this->password_ = user.password_;
     this->is_blocked_ = user.is_blocked_;
     this->password_limit_ = user.password_limit_;
+    this->need_change_password_ = user.need_change_password_;
 
     {
         user.name_.clear();
         user.password_.clear();
         user.is_blocked_ = false;
         user.password_limit_ = false;
+        user.need_change_password_ = false;
     }
 
     return *this;
@@ -50,6 +52,7 @@ bool User::ChangePassword(const std::string& password) {
         return false;
     }
     password_ = password;
+    need_change_password_ = false;
     return true;
 }
 
@@ -59,6 +62,10 @@ void User::SetIsBlocked(bool is_blocked) {
 
 void User::SetPasswordLimit(bool password_limit) {
     password_limit_ = password_limit;
+}
+
+void User::SetNeedChangePassword(bool need_change_password) {
+    need_change_password_ = need_change_password;
 }
 
 std::string User::GetName() const {
@@ -75,6 +82,10 @@ bool User::GetIsBlocked() const {
 
 bool User::GetIsLimited() const {
     return password_limit_;
+}
+
+bool User::GetNeedChagePassword() const {
+    return need_change_password_;
 }
 
 } // namespace users

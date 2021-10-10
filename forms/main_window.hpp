@@ -8,7 +8,7 @@
 
 namespace forms{
 
-enum class States {kPromt, kUpdateUser, kAdmin, kAdminChangeUser};
+enum class States {kPromt, kUpdateUser, kAdmin, kAdminChangeUser, kUserPromt};
 
 class MainWindow : public QMainWindow
 {

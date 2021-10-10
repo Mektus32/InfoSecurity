@@ -14,6 +14,7 @@ SOURCES += \
     forms/main_window.cpp \
     forms/promt.cpp \
     forms/update_user.cpp \
+    forms/user_promt.cpp \
     main.cpp \
     users/user.cpp \
     utils/utils.cpp
@@ -24,6 +25,7 @@ HEADERS += \
     forms/main_window.hpp \
     forms/promt.hpp \
     forms/update_user.hpp \
+    forms/user_promt.h \
     users/user.hpp \
     utils/utils.hpp
 

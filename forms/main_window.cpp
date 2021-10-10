@@ -6,6 +6,7 @@
 #include "update_user.hpp"
 #include "admin.hpp"
 #include "admin_change_user.hpp"
+#include "user_promt.h"
 
 #include <QJsonDocument>
 #include <QVBoxLayout>
@@ -22,7 +23,7 @@ namespace forms {
 namespace {
 
 const std::string kAdminName{"ADMIN"};
-const std::string kFilePath{"../../../data.json"};
+const std::string kFilePath{"data.json"};
 
 } // namespace
 
@@ -49,10 +50,11 @@ void MainWindow::ChangeState(States new_state) {
     delete current_form_;
 
     switch (new_state) {
-        case States::kPromt: current_form_ = new forms::Promt(this); break;
-        case States::kUpdateUser: current_form_ = new forms::UpdateUser(this); break;
-        case States::kAdmin: current_form_ = new forms::Admin(this); break;
-        case States::kAdminChangeUser: current_form_ = new forms::AdminChangeUser(this); break;
+        case States::kPromt: current_form_ = new Promt(this); break;
+        case States::kUpdateUser: current_form_ = new UpdateUser(this); break;
+        case States::kAdmin: current_form_ = new Admin(this); break;
+        case States::kAdminChangeUser: current_form_ = new AdminChangeUser(this); break;
+    case States::kUserPromt:current_form_ = new UserPromt(this); break;
     }
 
     current_state_ = new_state;
@@ -91,6 +93,10 @@ bool MainWindow::UpdateUserPassword(const std::string &new_password) {
 users::User MainWindow::GetNextUser(const std::string& name) {
 
     auto user = all_users_.find(name);
+    if (user == all_users_.end()) {
+        user = all_users_.begin();
+    }
+
     if ((++user)->second != admin_
             || user == all_users_.end()) {
         --user;
@@ -100,8 +106,9 @@ users::User MainWindow::GetNextUser(const std::string& name) {
         user = all_users_.begin();
     }
 
-    if (all_users_.size() > 1 && !user->first.size()) {
-         user->second = GetNextUser(user->first);
+    if (all_users_.size() > 2 && !user->first.size()) {
+        qDebug() << user->first.c_str();
+        user->second = GetNextUser(user->first);
     }
 
     return user->second;
@@ -125,6 +132,10 @@ bool MainWindow::CurrentUserIsAdmin() const {
 }
 
 bool MainWindow::CurrentUserHasPassword() const {
+    if (current_user_->second.GetNeedChagePassword()) {
+        return false;
+    }
+
     return static_cast<bool>(current_user_->second.GetPassword().size());
 }
 
@@ -145,6 +156,8 @@ bool MainWindow::GetUserByName(const std::string &name, users::User& user) const
 
 void MainWindow::GetDataFromFile() {
     QFile file(kFilePath.c_str());
+
+    system("pwd");
 
     if (!file.open(QIODevice::ReadOnly)) {
         QMessageBox message(QMessageBox::Icon::Critical, "Ошибка данных",
@@ -184,10 +197,13 @@ void MainWindow::SetDataInFile() {
             object["password"] = user.GetPassword().c_str();
             object["is_blocked"] = user.GetIsBlocked();
             object["is_limited"] = user.GetIsLimited();
+            object["need_change_password"] = user.GetNeedChagePassword();
             json_array.append(object);
         }
     }
-    json_doc.setArray(json_array);
+    QJsonObject object;
+    object["users"] = json_array;
+    json_doc.setObject(object);
     file.write(json_doc.toJson());
 
     file.close();
