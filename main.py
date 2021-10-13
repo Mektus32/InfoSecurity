@@ -12,14 +12,14 @@ hash_value = MD2.new(password.encode()).digest()
 
 if action == 'encrypt':
     with open('data.json', 'rb') as json_file:
-        encrypter = AES.new(hash_value, AES.MODE_CFB, hash_value)
+        encrypter = AES.new(right_hash, AES.MODE_CFB, right_hash)
         data = encrypter.encrypt(pad(json_file.read(), AES.block_size))
         with open('crypted', 'wb') as file:
             file.write(data)
 
 if action == 'decrypt' and right_hash == hash_value:
     with open('crypted', 'rb') as file:
-        dencrypter = AES.new(hash_value, AES.MODE_CFB, hash_value)
+        dencrypter = AES.new(right_hash, AES.MODE_CFB, right_hash)
         data = unpad(dencrypter.decrypt(file.read()), AES.block_size)
         with open('data.json', 'wb') as json_file:
             json_file.write(data)
